@@ -6,7 +6,7 @@ using UnityEngine;
 /// where the two spheres intersect, biased to the highest-Y solution. Otherwise
 /// it falls back to enforcing the first target's distance, also biased upward.
 /// Additionally enforces that the two targets themselves are no farther apart
-/// than `fixedDistanceTwoCircle`.
+/// than `fixedDistanceTwoCircle`, but only moves A—B remains fixed.
 /// </summary>
 [ExecuteAlways]
 public class CompassRig : MonoBehaviour
@@ -21,7 +21,7 @@ public class CompassRig : MonoBehaviour
     public float fixedDistanceB = 0f;
 
     [Header("Target Pair Separation Limit")]
-    [Tooltip("Maximum allowed distance between theAffectedA and theAffectedB. If exceeded, they are pulled toward midpoint.")]
+    [Tooltip("Maximum allowed distance between theAffectedA and theAffectedB. If exceeded, A is pulled toward B to satisfy the limit. B is never moved.")]
     public float fixedDistanceTwoCircle = 0f; // <=0 means no clamp
 
     [Header("Smoothing")]
@@ -32,16 +32,17 @@ public class CompassRig : MonoBehaviour
     [Header("Collider")]
     [SerializeField] private BoxCollider rigCollider;
 
-
     [Header("Pencil and Needle")]
     public GameObject anchorPencil;
     public GameObject anchorNeedle;
-
 
     [Header("State")]
     private float effectiveDistanceA;
     private float effectiveDistanceB;
     private bool initialized = false;
+
+    public float adjustAnglePencil = 90f;
+    public float adjustAngleNeedle = -90f;
 
     void Start()
     {
@@ -57,8 +58,10 @@ public class CompassRig : MonoBehaviour
 
     private void ResetRigPose()
     {
-        theAffectedA.transform.localPosition = Vector3.zero;
-        theAffectedB.transform.localPosition = Vector3.zero;
+        if (theAffectedA != null)
+            theAffectedA.transform.localPosition = Vector3.zero;
+        if (theAffectedB != null)
+            theAffectedB.transform.localPosition = Vector3.zero;
         transform.localPosition = new Vector3(0f, 3f, 0f);
     }
 
@@ -84,7 +87,10 @@ public class CompassRig : MonoBehaviour
         if (!initialized)
             Initialize();
 
-        // Clamp separation between theAffectedA and theAffectedB if needed
+        if (theAffectedA == null)
+            return;
+
+        // Clamp separation between theAffectedA and theAffectedB if needed (only moves A; B stays fixed)
         if (theAffectedA != null && theAffectedB != null && fixedDistanceTwoCircle > 0f)
         {
             Vector3 posA = theAffectedA.transform.position;
@@ -92,20 +98,12 @@ public class CompassRig : MonoBehaviour
             float currentDist = Vector3.Distance(posA, posB);
             if (currentDist > fixedDistanceTwoCircle)
             {
-                Vector3 midpoint = (posA + posB) * 0.5f;
-                Vector3 dirA = (posA - midpoint).normalized;
-                Vector3 dirB = (posB - midpoint).normalized;
-
-                Vector3 newA = midpoint + dirA * (fixedDistanceTwoCircle * 0.5f);
-                Vector3 newB = midpoint + dirB * (fixedDistanceTwoCircle * 0.5f);
-
+                // Move A toward B so distance == fixedDistanceTwoCircle
+                Vector3 dir = (posA - posB).normalized;
+                Vector3 newA = posB + dir * fixedDistanceTwoCircle;
                 theAffectedA.transform.position = newA;
-                theAffectedB.transform.position = newB;
             }
         }
-
-        if (theAffectedA == null)
-            return;
 
         Vector3 desiredPos = transform.position;
         Vector3 posA_current = theAffectedA.transform.position;
@@ -180,10 +178,6 @@ public class CompassRig : MonoBehaviour
             transform.position = Vector3.Lerp(transform.position, targetPos, positionLerp);
     }
 
-    public float adjustAnglePencil = 90f;
-    public float adjustAngleNeedle = -90f;
-
-
     private void RotateAnchorZLookAtBase()
     {
         if (anchorPencil != null)
@@ -191,7 +185,7 @@ public class CompassRig : MonoBehaviour
             Transform parent = anchorPencil.transform.parent;
             Vector3 localBasePos = parent != null
                 ? parent.InverseTransformPoint(transform.position)
-                : transform.position; // if no parent, world is local
+                : transform.position;
 
             Vector3 localAnchorPos = anchorPencil.transform.localPosition;
             Vector3 dirPencilLocal = localBasePos - localAnchorPos;
@@ -225,7 +219,7 @@ public class CompassRig : MonoBehaviour
     {
         if (rigCollider != null)
         {
-            // Move the collider to the center of the rig by its X and z axis pos only
+            // Move the collider to the center of the rig by its X and Z axis pos only
             Vector3 colliderPos = rigCollider.center;
             colliderPos.x = transform.localPosition.x;
             colliderPos.z = transform.localPosition.z;
