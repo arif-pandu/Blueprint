@@ -271,12 +271,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b89390a66f6f204692c82e10176c4c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
+  spawnEase: 16
+  durationSpawnAnim: 1
   raycastLayers:
     serializedVersion: 2
     m_Bits: 65
-  arriveThreshold: 0.05
-  debugDraw: 1
+  preserveY: 1
 --- !u!1 &6016425739238973902
 GameObject:
   m_ObjectHideFlags: 0
