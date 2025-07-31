@@ -29,6 +29,9 @@ public class CompassRig : MonoBehaviour
     [Range(0f, 1f)]
     public float positionLerp = 1f;
 
+    [Header("Collider")]
+    [SerializeField] private BoxCollider rigCollider;
+
 
     [Header("Pencil and Needle")]
     public GameObject anchorPencil;
@@ -151,6 +154,7 @@ public class CompassRig : MonoBehaviour
 
         ApplyPosition(desiredPos);
         RotateAnchorZLookAtBase();
+        ColliderFollowCenter();
     }
 
     private Vector3 EnforceSingleSphereUpwardBiased(Vector3 center, float radius, Vector3 current)
@@ -217,7 +221,17 @@ public class CompassRig : MonoBehaviour
         }
     }
 
-
+    void ColliderFollowCenter()
+    {
+        if (rigCollider != null)
+        {
+            // Move the collider to the center of the rig by its X and z axis pos only
+            Vector3 colliderPos = rigCollider.center;
+            colliderPos.x = transform.localPosition.x;
+            colliderPos.z = transform.localPosition.z;
+            rigCollider.center = colliderPos;
+        }
+    }
 
     void OnDrawGizmos()
     {
