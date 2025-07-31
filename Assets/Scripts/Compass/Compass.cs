@@ -9,7 +9,7 @@ using UnityEngine;
 /// than `fixedDistanceTwoCircle`.
 /// </summary>
 [ExecuteAlways]
-public class SimpleIK : MonoBehaviour
+public class Compass : MonoBehaviour
 {
     [Header("Targets / Distances")]
     public GameObject theAffectedA;
@@ -165,15 +165,48 @@ public class SimpleIK : MonoBehaviour
             transform.position = Vector3.Lerp(transform.position, targetPos, positionLerp);
     }
 
+    public float adjustAnglePencil = 90f;
+    public float adjustAngleNeedle = -90f;
+
+
     private void RotateAnchorZLookAtBase()
     {
-        // rotate the anchorPencil's Z transform axis to look at the transform.position
-        // make the X and Y axis remain the same(not affected)
+        if (anchorPencil != null)
+        {
+            Transform parent = anchorPencil.transform.parent;
+            Vector3 localBasePos = parent != null
+                ? parent.InverseTransformPoint(transform.position)
+                : transform.position; // if no parent, world is local
 
-        Vector3 dir = transform.position - anchorPencil.transform.position;
-        float angleDegrees = (Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg) - 90f;
-        anchorPencil.transform.rotation = Quaternion.Euler(0f, 0f, angleDegrees);
+            Vector3 localAnchorPos = anchorPencil.transform.localPosition;
+            Vector3 dirPencilLocal = localBasePos - localAnchorPos;
+
+            if (dirPencilLocal.sqrMagnitude > Mathf.Epsilon)
+            {
+                float angleDegreesPencil = (Mathf.Atan2(dirPencilLocal.y, dirPencilLocal.x) * Mathf.Rad2Deg) + adjustAnglePencil;
+                anchorPencil.transform.localRotation = Quaternion.Euler(0f, 0f, angleDegreesPencil);
+            }
+        }
+
+        if (anchorNeedle != null)
+        {
+            Transform parent = anchorNeedle.transform.parent;
+            Vector3 localBasePos = parent != null
+                ? parent.InverseTransformPoint(transform.position)
+                : transform.position;
+
+            Vector3 localAnchorPos = anchorNeedle.transform.localPosition;
+            Vector3 dirNeedleLocal = localBasePos - localAnchorPos;
+
+            if (dirNeedleLocal.sqrMagnitude > Mathf.Epsilon)
+            {
+                float angleDegreesNeedle = (Mathf.Atan2(dirNeedleLocal.y, dirNeedleLocal.x) * Mathf.Rad2Deg) + adjustAngleNeedle;
+                anchorNeedle.transform.localRotation = Quaternion.Euler(0f, 0f, angleDegreesNeedle);
+            }
+        }
     }
+
+
 
     void OnDrawGizmos()
     {
