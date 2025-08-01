@@ -3,10 +3,12 @@ using UnityEngine.EventSystems;
 
 public class UIDraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    [Tooltip("Prefab to spawn into world space on drop.")]
+    [Header("References")]
     public GameObject worldPrefab;
 
-    [Tooltip("Grid snap size in world units.")]
+
+    [Header("Snap")]
+    public bool isSnapping = true;
     public float snapSize = 1f;
 
     private Canvas canvas;
@@ -54,8 +56,16 @@ public class UIDraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         Ray ray = cam.ScreenPointToRay(eventData.position);
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
-            Vector3 snapped = SnapToGrid(hit.point, snapSize);
-            SpawnObject(snapped);
+            if (isSnapping)
+            {
+                Vector3 snapped = SnapToGrid(hit.point, snapSize);
+                SpawnObject(snapped);
+            }
+            else
+            {
+                SpawnObject(hit.point);
+            }
+
         }
 
         AnimateDestroyIcon();

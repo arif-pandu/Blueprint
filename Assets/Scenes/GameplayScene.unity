@@ -825,6 +825,7 @@ GameObject:
   - component: {fileID: 1286801760}
   - component: {fileID: 1286801762}
   - component: {fileID: 1286801761}
+  - component: {fileID: 1286801763}
   m_Layer: 0
   m_Name: Capsule (1)
   m_TagString: Untagged
@@ -897,6 +898,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1286801759}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1286801763
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1286801759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06296e123eebed647bfa4f45d8a9de12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  meshRenderer: {fileID: 1286801761}
+  activeMaterial: {fileID: 2100000, guid: f6bac45614e00344fb6cf0ba1919b39f, type: 2}
+  inactiveMaterial: {fileID: 2100000, guid: be396a9e5e24e824aa99f448d6783d45, type: 2}
 --- !u!1 &1291879198
 GameObject:
   m_ObjectHideFlags: 0
@@ -908,6 +924,7 @@ GameObject:
   - component: {fileID: 1291879199}
   - component: {fileID: 1291879201}
   - component: {fileID: 1291879200}
+  - component: {fileID: 1291879202}
   m_Layer: 0
   m_Name: Capsule (3)
   m_TagString: Untagged
@@ -980,6 +997,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1291879198}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1291879202
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1291879198}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06296e123eebed647bfa4f45d8a9de12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  meshRenderer: {fileID: 1291879200}
+  activeMaterial: {fileID: 2100000, guid: f6bac45614e00344fb6cf0ba1919b39f, type: 2}
+  inactiveMaterial: {fileID: 2100000, guid: be396a9e5e24e824aa99f448d6783d45, type: 2}
 --- !u!1 &1475913224
 GameObject:
   m_ObjectHideFlags: 0
@@ -991,6 +1023,7 @@ GameObject:
   - component: {fileID: 1475913225}
   - component: {fileID: 1475913227}
   - component: {fileID: 1475913226}
+  - component: {fileID: 1475913228}
   m_Layer: 0
   m_Name: Capsule (4)
   m_TagString: Untagged
@@ -1063,6 +1096,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1475913224}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1475913228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1475913224}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06296e123eebed647bfa4f45d8a9de12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  meshRenderer: {fileID: 1475913226}
+  activeMaterial: {fileID: 2100000, guid: f6bac45614e00344fb6cf0ba1919b39f, type: 2}
+  inactiveMaterial: {fileID: 2100000, guid: be396a9e5e24e824aa99f448d6783d45, type: 2}
 --- !u!1 &1484074701
 GameObject:
   m_ObjectHideFlags: 0
@@ -1345,6 +1393,7 @@ GameObject:
   - component: {fileID: 1985358617}
   - component: {fileID: 1985358619}
   - component: {fileID: 1985358618}
+  - component: {fileID: 1985358620}
   m_Layer: 0
   m_Name: Capsule (2)
   m_TagString: Untagged
@@ -1417,6 +1466,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1985358616}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1985358620
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1985358616}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06296e123eebed647bfa4f45d8a9de12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  meshRenderer: {fileID: 1985358618}
+  activeMaterial: {fileID: 2100000, guid: f6bac45614e00344fb6cf0ba1919b39f, type: 2}
+  inactiveMaterial: {fileID: 2100000, guid: be396a9e5e24e824aa99f448d6783d45, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
