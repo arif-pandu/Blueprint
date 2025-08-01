@@ -6,10 +6,12 @@ public class UIDraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     [Tooltip("Prefab to spawn into world space on drop.")]
     public GameObject worldPrefab;
 
+    [Tooltip("Grid snap size in world units.")]
+    public float snapSize = 1f;
+
     private Canvas canvas;
     private RectTransform rectTransform;
     private CanvasGroup canvasGroup;
-    // private Vector2 originalPosition;
 
     void Awake()
     {
@@ -21,10 +23,9 @@ public class UIDraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     public void OnBeginDrag(PointerEventData eventData)
     {
         if (eventData.button != PointerEventData.InputButton.Left)
-            return; // ignore non-left-button drags
+            return;
 
-        // originalPosition = rectTransform.anchoredPosition;
-        canvasGroup.blocksRaycasts = false; // so drop can see underlying raycast if needed
+        canvasGroup.blocksRaycasts = false;
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -32,7 +33,6 @@ public class UIDraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         if (eventData.button != PointerEventData.InputButton.Left)
             return;
 
-        // Move the UI icon with the pointer
         rectTransform.anchoredPosition += eventData.delta / canvas.scaleFactor;
     }
 
@@ -43,27 +43,41 @@ public class UIDraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
         canvasGroup.blocksRaycasts = true;
 
-        // Raycast from screen point into world
-        Ray ray = Camera.main.ScreenPointToRay(eventData.position);
+        Camera cam = Camera.main;
+        if (cam == null)
+        {
+            Debug.LogWarning("No Main Camera found for raycast.");
+            AnimateDestroyIcon();
+            return;
+        }
+
+        Ray ray = cam.ScreenPointToRay(eventData.position);
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
-            SpawnObject(hit.point);
+            Vector3 snapped = SnapToGrid(hit.point, snapSize);
+            SpawnObject(snapped);
         }
 
         AnimateDestroyIcon();
     }
 
+    private Vector3 SnapToGrid(Vector3 position, float gridSize)
+    {
+        return new Vector3(
+            Mathf.Round(position.x / gridSize) * gridSize,
+            Mathf.Round(position.y / gridSize) * gridSize,
+            Mathf.Round(position.z / gridSize) * gridSize
+        );
+    }
+
     private void AnimateDestroyIcon()
     {
-        // Optionally destroy the icon if you don't want it to remain in the UI
-        // and remove from the list in DraggableIconHandler
         LeanTween.scale(
             gameObject, Vector3.zero, 0.15f)
             .setEase(LeanTweenType.easeOutQuad)
             .setOnStart(() => DraggableIconHandler.Instance.spawnedIcons.Remove(this))
             .setOnComplete(() => Destroy(gameObject));
     }
-
 
     private void SpawnObject(Vector3 pos)
     {

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 /// <summary>
 /// Drag this handler to rotate its parent (statue) around Y.
@@ -19,6 +20,10 @@ public class CompassRotator : MonoBehaviour
     private Vector3 initialDir; // from statue to drag point on plane
     private float initialStatueYAngle;
 
+    [Header("Callbacks")]
+    public UnityEvent OnStartDrag;
+    public UnityEvent OnEndDrag;
+
     void Start()
     {
         cam = Camera.main;
@@ -35,6 +40,7 @@ public class CompassRotator : MonoBehaviour
     {
         if (statue == null) return;
         isDragging = true;
+        OnStartDrag?.Invoke();
 
         // define XZ plane at statue's current Y
         float y = statue.position.y;
@@ -78,6 +84,7 @@ public class CompassRotator : MonoBehaviour
 
     void OnMouseUp()
     {
+        OnEndDrag?.Invoke();
         isDragging = false;
     }
 }
