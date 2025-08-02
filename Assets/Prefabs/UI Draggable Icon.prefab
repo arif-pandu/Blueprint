@@ -85,7 +85,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5015ac9db7fac734c99e13699893612d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  worldPrefab: {fileID: 5015795405423054309, guid: 07243c5c112deb448a50dc725b24fbe0, type: 3}
+  worldPrefab: {fileID: 599334588750060449, guid: 712342f72588c1f40a5f22b540e72969, type: 3}
+  isSnapping: 1
+  snapSize: 1
 --- !u!1 &5350087653349363846
 GameObject:
   m_ObjectHideFlags: 0

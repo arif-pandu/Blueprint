@@ -9,6 +9,9 @@ public class TwoLegRevolver : MonoBehaviour
     public Transform legA;
     public Transform legB;
 
+    [Header("Connector")]
+    [SerializeField] private Transform connectorAwithB; // visually connects leg A to B
+
     [Header("Settings")]
     public float orbitRadius = 1f; // radius of circular track
     public float pickRadius = 0.3f; // how close you must click to grab a leg
@@ -46,6 +49,7 @@ public class TwoLegRevolver : MonoBehaviour
 
         HandleInput();
         RecenterParent();
+        UpdateConnector();
     }
 
     void SetupDragPlane()
@@ -198,4 +202,32 @@ public class TwoLegRevolver : MonoBehaviour
             Gizmos.DrawSphere(transform.position, 0.04f);
         }
     }
+
+    // add this helper inside the class
+    float AverageAngleDegrees(float a, float b)
+    {
+        float diff = Mathf.DeltaAngle(a, b);
+        return a + diff * 0.5f;
+    }
+
+    void UpdateConnector()
+    {
+        SetYRotationTowards(connectorAwithB, legA.position, legB.position);
+    }
+
+    private void SetYRotationTowards(Transform target, Vector3 startPos, Vector3 endPos)
+    {
+        if (target == null) return;
+
+        Vector3 dir = endPos - startPos;
+        dir.y = 0f; // ignore vertical difference
+
+        if (dir.sqrMagnitude < 1e-6f) return; // too small to define direction
+
+        // Compute yaw: Atan2(x, z) gives angle where forward (+Z) points toward dir
+        float angleY = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg;
+
+        target.rotation = Quaternion.Euler(0f, angleY + 90f, 0f);
+    }
+
 }
