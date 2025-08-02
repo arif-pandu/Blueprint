@@ -11,6 +11,13 @@ public class UIDraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     public bool isSnapping = true;
     public float snapSize = 1f;
 
+    [Header("Animation")]
+    [SerializeField] private float scaleDownSize = 0.8f; // Scale down to 80% when dragging
+    [SerializeField] private float scaleDownDuration = 0.15f;
+    [SerializeField] private LeanTweenType scaleDownEase = LeanTweenType.easeOutQuad;
+    [SerializeField] private float scaleUpDuration = 0.15f;
+    [SerializeField] private LeanTweenType scaleUpEase = LeanTweenType.easeOutQuad;
+
     private Canvas canvas;
     private RectTransform rectTransform;
     private CanvasGroup canvasGroup;
@@ -28,6 +35,9 @@ public class UIDraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, I
             return;
 
         canvasGroup.blocksRaycasts = false;
+
+        // Animate scale down when dragging starts
+        AnimateScaleDown(true);
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -42,6 +52,9 @@ public class UIDraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     {
         if (eventData.button != PointerEventData.InputButton.Left)
             return;
+
+        // Animate scale back up when dragging ends
+        AnimateScaleDown(false);
 
         canvasGroup.blocksRaycasts = true;
 
@@ -69,6 +82,22 @@ public class UIDraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         }
 
         AnimateDestroyIcon();
+    }
+
+    private void AnimateScaleDown(bool isDrag)
+    {
+        // scale down when isDrag is true
+        // scale back to Vector3.one when isDrag is false
+        float duration = isDrag ? scaleDownDuration : scaleUpDuration;
+        LeanTween.scale(gameObject, isDrag ? Vector3.one * scaleDownSize : Vector3.one, duration)
+            .setEase(isDrag ? scaleDownEase : scaleUpEase)
+            .setOnComplete(() =>
+            {
+                if (!isDrag)
+                {
+                    canvasGroup.blocksRaycasts = true;
+                }
+            });
     }
 
     private Vector3 SnapToGrid(Vector3 position, float gridSize)

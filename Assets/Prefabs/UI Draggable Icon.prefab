@@ -88,6 +88,11 @@ MonoBehaviour:
   worldPrefab: {fileID: 599334588750060449, guid: 712342f72588c1f40a5f22b540e72969, type: 3}
   isSnapping: 0
   snapSize: 1
+  scaleDownSize: 0.2
+  scaleDownDuration: 0.1
+  scaleDownEase: 2
+  scaleUpDuration: 0.1
+  scaleUpEase: 2
 --- !u!1 &5350087653349363846
 GameObject:
   m_ObjectHideFlags: 0
