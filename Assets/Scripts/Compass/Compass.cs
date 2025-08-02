@@ -14,7 +14,12 @@ public class Compass : MonoBehaviour
 
     [Header("Settings")]
     public float orbitRadius = 1f; // radius of circular track
+    private float copyOrbitRadius = 1f; // used for spawn animation
     public float pickRadius = 0.3f; // how close you must click to grab a leg
+
+    [Header("Spawn Animation")]
+    public float spawnDuration = 1f;
+    public LeanTweenType spawnEase = LeanTweenType.easeOutBack;
 
     [Header("Events")]
     public UnityEvent OnStartDragLegA;
@@ -31,6 +36,7 @@ public class Compass : MonoBehaviour
 
     void OnEnable()
     {
+        copyOrbitRadius = orbitRadius; // store initial radius for spawn animation
         SetupDragPlane();
         if (legA != null && legB != null)
         {
@@ -50,6 +56,47 @@ public class Compass : MonoBehaviour
         HandleInput();
         RecenterParent();
         UpdateConnector();
+    }
+
+    public void AnimateSpawn()
+    {
+        if (legA == null || legB == null)
+        {
+            Debug.LogWarning("Legs not assigned; cannot animate spawn.");
+            return;
+        }
+
+        // Capture initial normalized direction from center to each leg so they expand consistently.
+        Vector3 center = transform.position;
+        Vector3 dirA = (legA.position - center).sqrMagnitude > 0.0001f
+            ? (legA.position - center).normalized
+            : Vector3.right;
+        Vector3 dirB = (legB.position - center).sqrMagnitude > 0.0001f
+            ? (legB.position - center).normalized
+            : Vector3.left;
+
+        // Start from zero radius
+        // orbitRadius = 0f;
+        legA.position = center + dirA * orbitRadius;
+        legB.position = center + dirB * orbitRadius;
+
+        // Tween orbitRadius up to 3 (or current target if you want to parameterize)
+        LeanTween.value(gameObject, 0f, orbitRadius / 2, spawnDuration)
+            .setEase(spawnEase)
+            .setOnUpdate((float val) =>
+            {
+                orbitRadius = val;
+                // Update leg positions along their original direction unless dragging
+                if (!isDragging)
+                {
+                    legA.position = center + dirA * orbitRadius;
+                    legB.position = center + dirB * orbitRadius;
+                }
+            })
+            .setOnComplete(() =>
+            {
+                orbitRadius = copyOrbitRadius; // restore original radius after animation
+            });
     }
 
     void SetupDragPlane()
@@ -112,7 +159,6 @@ public class Compass : MonoBehaviour
                 Debug.Log("OnEndDrag B");
                 OnEndDragB?.Invoke();
             }
-
 
             EndDrag();
         }
@@ -229,5 +275,4 @@ public class Compass : MonoBehaviour
 
         target.rotation = Quaternion.Euler(0f, angleY + 90f, 0f);
     }
-
 }

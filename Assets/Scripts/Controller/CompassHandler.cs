@@ -36,7 +36,7 @@ public class CompassHandler : StaticReference<CompassHandler>
 
         Compass compassInstance = Instantiate(compassPrefab, pos, Quaternion.identity);
         compassInstance.transform.SetParent(parentToSpawn.transform, false);
-        // compassInstance.AnimateSpawn();
+        compassInstance.AnimateSpawn();
 
         spawnedCompasses.Add(compassInstance);
 
