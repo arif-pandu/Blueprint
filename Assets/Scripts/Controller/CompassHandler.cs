@@ -5,14 +5,14 @@ using UnityEngine;
 public class CompassHandler : StaticReference<CompassHandler>
 {
     [Header("Prefab")]
-    [SerializeField] private TwoLegRevolver compassPrefab;
+    [SerializeField] private Compass compassPrefab;
 
 
     [Header("References")]
     [SerializeField] private GameObject parentToSpawn;
 
     [Header("Data")]
-    public List<TwoLegRevolver> spawnedCompasses = new();
+    public List<Compass> spawnedCompasses = new();
 
 
 
@@ -34,7 +34,7 @@ public class CompassHandler : StaticReference<CompassHandler>
             return;
         }
 
-        TwoLegRevolver compassInstance = Instantiate(compassPrefab, pos, Quaternion.identity);
+        Compass compassInstance = Instantiate(compassPrefab, pos, Quaternion.identity);
         compassInstance.transform.SetParent(parentToSpawn.transform, false);
         // compassInstance.AnimateSpawn();
 

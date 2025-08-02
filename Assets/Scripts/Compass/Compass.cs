@@ -1,79 +1,233 @@
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.EventSystems;
 
+[ExecuteAlways]
 public class Compass : MonoBehaviour
 {
-    [Header("Rig")]
-    [SerializeField] private CompassRig rig;
+    [Header("Legs")]
+    public Transform legA;
+    public Transform legB;
 
-    [Header("Animation")]
-    public LeanTweenType spawnEase = LeanTweenType.easeInOutSine;
-    public float durationSpawnAnim = 0.125f;
+    [Header("Connector")]
+    [SerializeField] private Transform connectorAwithB; // visually connects leg A to B
 
-    [Header("Setup")]
-    public LayerMask raycastLayers;
-    public bool preserveY = true;
-    [Tooltip("Multiplier from screen-space delta to world X movement.")]
-    [SerializeField] private float dragSensitivity = 0.01f;
+    [Header("Settings")]
+    public float orbitRadius = 1f; // radius of circular track
+    public float pickRadius = 0.3f; // how close you must click to grab a leg
 
-    [Header("State")]
-    private Camera cam;
-    private int currentTweenId = -1;
+    [Header("Events")]
+    public UnityEvent OnStartDragLegA;
+    public UnityEvent OnStartDragLegB;
+    public UnityEvent OnEndDragA;
+    public UnityEvent OnEndDragB;
 
-    // internal drag state
+    // internal
+    private Transform draggingLeg = null;
+    private Transform fixedAnchor = null;
     private bool isDragging = false;
-    private float initialAffectedAX;
-    private Vector3 dragStartMousePos;
 
-    public void AnimateSpawn()
-    {
-        LeanTween.cancel(currentTweenId);
-        currentTweenId = LeanTween.scale(gameObject, Vector3.one, durationSpawnAnim)
-            .setEase(spawnEase)
-            .setOnComplete(() => currentTweenId = -1)
-            .id;
-    }
+    private Plane dragPlane;
 
-    void Awake()
+    void OnEnable()
     {
-        cam = Camera.main;
+        SetupDragPlane();
+        if (legA != null && legB != null)
+        {
+            if ((legA.position - legB.position).magnitude < 0.001f)
+            {
+                legA.position = transform.position + Vector3.right * orbitRadius * 0.5f;
+                legB.position = transform.position + Vector3.left * orbitRadius * 0.5f;
+            }
+            RecenterParent();
+        }
     }
 
     void Update()
     {
-        if (rig == null || rig.theAffectedA == null)
-            return;
+        if (legA == null || legB == null) return;
 
-        // Begin drag
+        HandleInput();
+        RecenterParent();
+        UpdateConnector();
+    }
+
+    void SetupDragPlane()
+    {
+        Camera cam = Camera.main;
+        if (cam != null)
+            dragPlane = new Plane(cam.transform.forward * -1f, transform.position);
+        else
+            dragPlane = new Plane(Vector3.forward, transform.position);
+    }
+
+    void HandleInput()
+    {
         if (Input.GetMouseButtonDown(0))
         {
-            Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, raycastLayers))
+            if (PointerOverUI()) return;
+
+            Vector3 worldPos;
+            if (!UpdateDragPlaneForCurrentView()) return;
+            if (ScreenPointToPlane(Input.mousePosition, out worldPos))
             {
-                if (hit.collider != null && hit.collider.gameObject == gameObject)
+                float dA = Vector3.Distance(worldPos, legA.position);
+                float dB = Vector3.Distance(worldPos, legB.position);
+
+                if (dA <= pickRadius && dA <= dB)
                 {
-                    isDragging = true;
-                    dragStartMousePos = Input.mousePosition;
-                    // Store the initial x (in local space to preserve transform hierarchy behavior)
-                    initialAffectedAX = rig.theAffectedA.transform.localPosition.x;
+                    StartDrag(legA, legB);
+                    OnStartDragLegA?.Invoke();
+                }
+                else if (dB <= pickRadius && dB < dA)
+                {
+                    StartDrag(legB, legA);
+                    OnStartDragLegB?.Invoke();
                 }
             }
         }
 
-        // Dragging
-        if (isDragging && Input.GetMouseButton(0))
+        if (Input.GetMouseButton(0) && isDragging && draggingLeg != null && fixedAnchor != null)
         {
-            float deltaScreenX = Input.mousePosition.x - dragStartMousePos.x;
-            float deltaWorldX = deltaScreenX * dragSensitivity;
-
-            Vector3 localPos = rig.theAffectedA.transform.localPosition;
-            localPos.x = initialAffectedAX + deltaWorldX;
-            rig.theAffectedA.transform.localPosition = localPos;
+            Vector3 worldPos;
+            if (ScreenPointToPlane(Input.mousePosition, out worldPos))
+            {
+                Vector3 dir = (worldPos - fixedAnchor.position);
+                if (dir.sqrMagnitude < 0.0001f) return;
+                dir = dir.normalized;
+                Vector3 target = fixedAnchor.position + dir * orbitRadius;
+                draggingLeg.position = target;
+            }
         }
 
-        // End drag
-        if (isDragging && Input.GetMouseButtonUp(0))
+        if (Input.GetMouseButtonUp(0) && isDragging)
         {
-            isDragging = false;
+            if (draggingLeg == legA)
+            {
+                Debug.Log("OnEndDrag A");
+                OnEndDragA?.Invoke();
+            }
+            else if (draggingLeg == legB)
+            {
+                Debug.Log("OnEndDrag B");
+                OnEndDragB?.Invoke();
+            }
+
+
+            EndDrag();
         }
     }
+
+    bool UpdateDragPlaneForCurrentView()
+    {
+        Camera cam = Camera.main;
+        if (cam == null) return false;
+        if (fixedAnchor != null)
+            dragPlane = new Plane(cam.transform.forward * -1f, fixedAnchor.position);
+        else
+            dragPlane = new Plane(cam.transform.forward * -1f, transform.position);
+        return true;
+    }
+
+    void StartDrag(Transform toDrag, Transform anchor)
+    {
+        draggingLeg = toDrag;
+        fixedAnchor = anchor;
+        isDragging = true;
+        UpdateDragPlaneForCurrentView();
+        Vector3 fromAnchor = (draggingLeg.position - fixedAnchor.position).normalized;
+        if (fromAnchor.sqrMagnitude < 0.0001f)
+            fromAnchor = Vector3.right;
+        draggingLeg.position = fixedAnchor.position + fromAnchor * orbitRadius;
+    }
+
+    void EndDrag()
+    {
+        draggingLeg = null;
+        fixedAnchor = null;
+        isDragging = false;
+    }
+
+    bool PointerOverUI()
+    {
+        if (EventSystem.current != null)
+            return EventSystem.current.IsPointerOverGameObject();
+        return false;
+    }
+
+    bool ScreenPointToPlane(Vector3 screenPoint, out Vector3 worldPos)
+    {
+        Ray ray = Camera.main.ScreenPointToRay(screenPoint);
+        float enter;
+        if (dragPlane.Raycast(ray, out enter))
+        {
+            worldPos = ray.GetPoint(enter);
+            return true;
+        }
+        worldPos = Vector3.zero;
+        return false;
+    }
+
+    void RecenterParent()
+    {
+        if (legA == null || legB == null) return;
+        Vector3 mid = (legA.position + legB.position) * 0.5f;
+        Vector3 delta = mid - transform.position;
+        if (delta.sqrMagnitude < 1e-8f) return;
+        transform.position = mid;
+        legA.position -= delta;
+        legB.position -= delta;
+    }
+
+    void OnDrawGizmos()
+    {
+        if (legA != null && legB != null)
+        {
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireSphere(legA.position, orbitRadius);
+            Gizmos.DrawWireSphere(legB.position, orbitRadius);
+
+            Gizmos.color = Color.green;
+            Gizmos.DrawSphere(legA.position, 0.05f);
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawSphere(legB.position, 0.05f);
+
+            if (draggingLeg != null && fixedAnchor != null)
+            {
+                Gizmos.color = Color.white;
+                Gizmos.DrawLine(fixedAnchor.position, draggingLeg.position);
+            }
+
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawSphere(transform.position, 0.04f);
+        }
+    }
+
+    // add this helper inside the class
+    float AverageAngleDegrees(float a, float b)
+    {
+        float diff = Mathf.DeltaAngle(a, b);
+        return a + diff * 0.5f;
+    }
+
+    void UpdateConnector()
+    {
+        SetYRotationTowards(connectorAwithB, legA.position, legB.position);
+    }
+
+    private void SetYRotationTowards(Transform target, Vector3 startPos, Vector3 endPos)
+    {
+        if (target == null) return;
+
+        Vector3 dir = endPos - startPos;
+        dir.y = 0f; // ignore vertical difference
+
+        if (dir.sqrMagnitude < 1e-6f) return; // too small to define direction
+
+        // Compute yaw: Atan2(x, z) gives angle where forward (+Z) points toward dir
+        float angleY = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg;
+
+        target.rotation = Quaternion.Euler(0f, angleY + 90f, 0f);
+    }
+
 }
