@@ -30,11 +30,17 @@ public class Marker : MonoBehaviour
     private Vector3 lastPoint;
     private Vector3 lastDirection = Vector3.zero;
     private bool isMarkingActive = false;
+    private List<Target> targets = new();
 
     void Awake()
     {
         lineRenderer = GetComponent<LineRenderer>();
         ResetTrace();
+    }
+
+    void Start()
+    {
+        targets = new List<Target>(FindObjectsOfType<Target>());
     }
 
     void Update()
@@ -115,6 +121,8 @@ public class Marker : MonoBehaviour
         isMarkingActive = false;
         if (simplifyTolerance > 0f && points.Count > 2)
             lineRenderer.Simplify(simplifyTolerance);
+
+        CheckIntersection();
     }
 
     public void ResetTrace()
@@ -123,5 +131,34 @@ public class Marker : MonoBehaviour
         lineRenderer.positionCount = 0;
         lastDirection = Vector3.zero;
         isMarkingActive = false;
+    }
+
+
+    private void CheckIntersection()
+    {
+        // loop all targets and check if the one or more point of line  is intersects with any of them
+        if (targets.Count == 0) return;
+        foreach (var target in targets)
+        {
+            if (target == null) continue;
+
+            for (int i = 0; i < points.Count - 1; i++)
+            {
+                Vector3 start = points[i];
+                Vector3 end = points[i + 1];
+
+                // check distance from line segment to target position
+                float distance = Vector3.Distance(target.transform.position, Vector3.ProjectOnPlane(end - start, Vector3.up) + start);
+                if (distance < .25f)
+                {
+                    // intersection detected, do something with the target
+                    target.SetMaterialByState(true);
+                    break; // exit loop after first intersection
+                }
+
+            }
+        }
+
+
     }
 }

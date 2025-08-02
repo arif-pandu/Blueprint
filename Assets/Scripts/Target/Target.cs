@@ -12,6 +12,7 @@ public class Target : MonoBehaviour
     [SerializeField] private Material activeMaterial;
     [SerializeField] private Material inactiveMaterial;
 
+    [Header("State")]
 
     private bool isActive = false;
 
@@ -24,7 +25,7 @@ public class Target : MonoBehaviour
 
 
 
-    void SetMaterialByState(bool isActive)
+    public void SetMaterialByState(bool isActive)
     {
         if (meshRenderer == null)
         {
