@@ -4,8 +4,10 @@ using UnityEngine.SceneManagement;
 public class WinningHandler : MonoBehaviour
 {
     [SerializeField] private GameObject holder;
+    [SerializeField] private GameObject holderMaxLevel;
 
     private int currentLevel;
+    private int maxLevel = 10; // Set this to the maximum level you want to allow
 
     void Start()
     {
@@ -14,13 +16,18 @@ public class WinningHandler : MonoBehaviour
 
     public void OnSetupWinPanel()
     {
-        if (holder == null)
+        if (currentLevel >= maxLevel)
         {
-            Debug.LogError("Holder is not assigned in WinningHandler.");
-            return;
+            // If the current level is the maximum level, show the max level holder
+            holder.SetActive(false);
+            holderMaxLevel.SetActive(true);
         }
-
-        holder.SetActive(true);
+        else
+        {
+            // Otherwise, show the regular win holder
+            holder.SetActive(true);
+            holderMaxLevel.SetActive(false);
+        }
     }
     public void OnTapHome()
     {
