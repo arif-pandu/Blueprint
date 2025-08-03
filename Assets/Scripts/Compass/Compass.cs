@@ -80,6 +80,8 @@ public class Compass : MonoBehaviour
         legA.position = center + dirA * orbitRadius;
         legB.position = center + dirB * orbitRadius;
 
+        AudioManager.Instance.PlayTapSound();
+
         // Tween orbitRadius up to 3 (or current target if you want to parameterize)
         LeanTween.value(gameObject, 0f, orbitRadius / 2, spawnDuration)
             .setEase(spawnEase)
@@ -152,11 +154,13 @@ public class Compass : MonoBehaviour
             if (draggingLeg == legA)
             {
                 Debug.Log("OnEndDrag A");
+                AudioManager.Instance.PlayDragSound();
                 OnEndDragA?.Invoke();
             }
             else if (draggingLeg == legB)
             {
                 Debug.Log("OnEndDrag B");
+                AudioManager.Instance.PlayDragSound();
                 OnEndDragB?.Invoke();
             }
 

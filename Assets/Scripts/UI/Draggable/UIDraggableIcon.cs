@@ -35,6 +35,7 @@ public class UIDraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, I
             return;
 
         canvasGroup.blocksRaycasts = false;
+        AudioManager.Instance.PlayTapSound();
 
         // Animate scale down when dragging starts
         AnimateScaleDown(true);
