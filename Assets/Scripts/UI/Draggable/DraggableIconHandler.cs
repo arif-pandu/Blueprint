@@ -24,12 +24,8 @@ public class DraggableIconHandler : StaticReference<DraggableIconHandler>
         BaseOnDestroy();
     }
 
-    void Start()
-    {
-        SpawnIcons();
-    }
-
-    void SpawnIcons()
+    // call this in GameplayController to spawn the icons
+    public void SpawnIcons(int totalSpawn)
     {
         for (int i = 0; i < totalSpawn; i++)
         {

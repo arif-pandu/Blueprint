@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,6 +5,7 @@ public class TargetHandler : StaticReference<TargetHandler>
 {
     [SerializeField] private float tolerance = 0.5f;
     [SerializeField] private List<Target> targets = new();
+    [SerializeField] private Transform parentToSpawn;
 
     public List<Target> Targets
     {
@@ -25,6 +25,33 @@ public class TargetHandler : StaticReference<TargetHandler>
         BaseOnDestroy();
     }
 
+    public void SpawnTargets(Level levelObj)
+    {
+        Level theObj = Instantiate(levelObj);
+        theObj.transform.SetParent(parentToSpawn);
+        theObj.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+        theObj.transform.localScale = Vector3.one; // Reset scale to parent
+
+        RegisterTargets(theObj);
+    }
+
+    public void RegisterTargets(Level levelData)
+    {
+        if (levelData.Targets == null || levelData.Targets.Count == 0)
+        {
+            Debug.LogWarning("Attempted to register an empty or null list of targets.");
+            return;
+        }
+
+        foreach (var target in levelData.Targets)
+        {
+            if (target != null && !targets.Contains(target))
+            {
+                targets.Add(target);
+            }
+        }
+    }
+
     public void RegisterLineRenderer(LineRenderer lineRenderer)
     {
         if (lineRenderer == null)
@@ -36,6 +63,7 @@ public class TargetHandler : StaticReference<TargetHandler>
         if (!lineRenderers.Contains(lineRenderer))
         {
             lineRenderers.Add(lineRenderer);
+            Debug.Log($"Registered LineRenderer: {lineRenderer.name}");
         }
     }
 
