@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameplayController : StaticReference<GameplayController>
 {
@@ -96,6 +97,12 @@ public class GameplayController : StaticReference<GameplayController>
     {
         Debug.Log("Level Completed");
         winningHandler.OnSetupWinPanel();
+    }
+
+
+    public void RestartGame()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
 
