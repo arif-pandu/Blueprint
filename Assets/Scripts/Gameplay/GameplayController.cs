@@ -105,5 +105,10 @@ public class GameplayController : StaticReference<GameplayController>
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
+    public void GotoHome()
+    {
+        SceneManager.LoadScene("MainMenuScene");
+    }
+
 
 }

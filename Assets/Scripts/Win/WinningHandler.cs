@@ -7,7 +7,7 @@ public class WinningHandler : MonoBehaviour
     [SerializeField] private GameObject holderMaxLevel;
 
     private int currentLevel;
-    private int maxLevel = 10; // Set this to the maximum level you want to allow
+    private int maxLevel = 9; // Set this to the maximum level you want to allow
 
     void Start()
     {
