@@ -58,8 +58,14 @@ public class GameplayController : StaticReference<GameplayController>
         draggableIconHandler.SpawnIcons(levelData.AvailableCompasses);
 
         // Spawn targets
-        targetHandler.SpawnTargets(levelData);        
+        targetHandler.SpawnTargets(levelData);
 
+    }
+
+
+    public void SetupGameFinished()
+    {
+        Debug.Log("Level Completed");
     }
 
 

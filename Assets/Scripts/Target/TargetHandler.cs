@@ -1,11 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class TargetHandler : StaticReference<TargetHandler>
 {
     [SerializeField] private float tolerance = 0.5f;
     [SerializeField] private List<Target> targets = new();
     [SerializeField] private Transform parentToSpawn;
+
+    [Header("Events")]
+    [SerializeField] private UnityEvent allTargetsActiveEvent;
 
     public List<Target> Targets
     {
@@ -14,6 +18,8 @@ public class TargetHandler : StaticReference<TargetHandler>
 
     private List<LineRenderer> lineRenderers = new();
 
+    // track to avoid firing the event repeatedly if nothing changed
+    private bool hadAllActive = false;
 
     void Awake()
     {
@@ -50,6 +56,9 @@ public class TargetHandler : StaticReference<TargetHandler>
                 targets.Add(target);
             }
         }
+
+        // Reset the all-active tracking when new targets are added
+        hadAllActive = false;
     }
 
     public void RegisterLineRenderer(LineRenderer lineRenderer)
@@ -67,12 +76,10 @@ public class TargetHandler : StaticReference<TargetHandler>
         }
     }
 
-
     public void OnMarkerFinishMarking()
     {
         CheckIntersection(lineRenderers);
     }
-
 
     public void CheckIntersection(List<LineRenderer> theLine)
     {
@@ -134,10 +141,28 @@ public class TargetHandler : StaticReference<TargetHandler>
                 }
             }
         }
+
+        // After updating all targets, check if all are active
+        bool allActiveNow = true;
+        foreach (var t in targets)
+        {
+            if (t == null || !t.IsActive)
+            {
+                allActiveNow = false;
+                Debug.Log($"Target is not active.");
+                break;
+            }
+        }
+
+        if (allActiveNow && !hadAllActive)
+        {
+            // invoke the event once upon transition to all-active
+            Debug.Log("All targets are now active.");
+            allTargetsActiveEvent?.Invoke();
+        }
+
+        hadAllActive = allActiveNow;
     }
-
-
-
 
     void OnDrawGizmos()
     {

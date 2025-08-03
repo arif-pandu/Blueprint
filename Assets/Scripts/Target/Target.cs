@@ -48,12 +48,15 @@ public class Target : MonoBehaviour
         }
 
         Debug.Log($"Setting target state to {(isActive ? "active" : "inactive")}");
+        
+        this.isActive = isActive;
+        
 
         // animate color using LeanTween
         Color targetColor = isActive ? activeColor : inactiveColor;
         LeanTween.cancel(spriteRenderer.gameObject); // Cancel any ongoing color transitions
         LeanTween.color(spriteRenderer.gameObject, targetColor, colorTransitionDuration)
-            .setEase(colorTransitionEase)
-            .setOnComplete(() => this.isActive = isActive); // Update state after transition
+            .setEase(colorTransitionEase);
+            // .setOnComplete(() => this.isActive = isActive); // Update state after transition
     }
 }
