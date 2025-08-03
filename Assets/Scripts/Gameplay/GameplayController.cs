@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class GameplayController : StaticReference<GameplayController>
 {
+    [SerializeField] private bool isTest = false;
+    [SerializeField] private int levelTest = 1;
+
     [Header("References")]
     [SerializeField] private TargetHandler targetHandler;
     [SerializeField] private DraggableIconHandler draggableIconHandler;
@@ -59,10 +62,10 @@ public class GameplayController : StaticReference<GameplayController>
     private void LoadHighestLevelData()
     {
         // Load the highest level data from LevelGlossary
-        LevelGlossary levelGlossary = FindObjectOfType<LevelGlossary>();
+
         if (levelGlossary != null)
         {
-            int highestLevelID = PlayerPrefs.GetInt("HighestLevelID", 0); // Default to level 1 if not set
+            int highestLevelID = isTest ? levelTest : PlayerPrefs.GetInt("HighestLevelID", 0); // Default to level 1 if not set          
 
             LevelData data = levelGlossary.GetLevelData(highestLevelID);
             levelData = data.Level;
